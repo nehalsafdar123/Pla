@@ -13,14 +13,15 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Update putty-tools package
-      run: sudo apt-get update && sudo apt-get upgrade putty-tools -y
+    - name: Write private key to file
+      run: echo "${{ secrets.PRIVATE_KEY }}" > PRIVATE_KEY.pem
 
     - name: Convert private key to PuTTY format
       run: |
         openssl rsa -in PRIVATE_KEY.pem -outform DER -out PRIVATE_KEY.der
-        ssh-keygen -i -f PRIVATE_KEY.der > PRIVATE_KEY.pub
-        puttygen PRIVATE_KEY.pub -o PRIVATE_KEY.ppk
+
+    - name: Update putty-tools package
+      run: sudo apt-get update && sudo apt-get upgrade putty-tools -y
 
     - name: Run PuTTY with private key
-      run: putty.exe -ssh test-staging.trp.ignishealth.com -i PRIVATE_KEY.ppk
+      run: putty.exe -ssh username@hostname -i PRIVATE_KEY.ppk
