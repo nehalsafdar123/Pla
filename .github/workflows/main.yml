@@ -1,4 +1,4 @@
-name: PuTTY Examplee
+name: PuTTY Example
 
 on:
   push:
@@ -12,21 +12,15 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-      
+
     - name: Update putty-tools package
       run: sudo apt-get update && sudo apt-get upgrade putty-tools -y
 
-    - name: Run PuTTY with private key
+    - name: Convert private key to PuTTY format
       run: |
-        # Create private key file
-        echo "${{ secrets.PRIVATE_KEY }}" > private_key.pem
-        chmod 600 private_key.pem
+        openssl rsa -in PRIVATE_KEY.pem -outform DER -out PRIVATE_KEY.der
+        ssh-keygen -i -f PRIVATE_KEY.der > PRIVATE_KEY.pub
+        puttygen PRIVATE_KEY.pub -o PRIVATE_KEY.ppk
 
-        # Install PuTTY (replace with appropriate download and install commands)
-        sudo apt-get install putty -y
-
-        # Convert private key format (if needed, adjust the command accordingly)
-        puttygen private_key.pem -O private -o private_key.ppk
-
-        # Run PuTTY command using private key
-        putty.exe -ssh test-staging.trp.ignishealth.com -i private_key.ppk
+    - name: Run PuTTY with private key
+      run: putty.exe -ssh username@hostname -i PRIVATE_KEY.ppk
