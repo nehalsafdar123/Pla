@@ -12,6 +12,9 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+      
+    - name: Set file permissions
+      run: chmod 400 PRIVATE_KEY.pem
 
     - name: Write private key to file
       run: echo "${{ secrets.PRIVATE_KEY }}" > PRIVATE_KEY.pem
