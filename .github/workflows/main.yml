@@ -1,4 +1,4 @@
-name: SSH Example
+name: PuTTY Example
 
 on:
   push:
@@ -13,6 +13,17 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Run SSH command
+    - name: Run PuTTY with private key
       run: |
-        ssh username@hostname "command"
+        # Create private key file
+        echo "${{ secrets.PRIVATE_KEY }}" > private_key.pem
+        chmod 600 private_key.pem
+
+        # Install PuTTY (replace with appropriate download and install commands)
+        sudo apt-get install putty -y
+
+        # Convert private key format (if needed, adjust the command accordingly)
+        puttygen private_key.pem -O private -o private_key.ppk
+
+        # Run PuTTY command using private key
+        putty.exe -ssh test-staging.trp.ignishealth.com -i private_key.ppk
