@@ -23,4 +23,4 @@ jobs:
         puttygen PRIVATE_KEY.pub -o PRIVATE_KEY.ppk
 
     - name: Run PuTTY with private key
-      run: putty.exe -ssh username@hostname -i PRIVATE_KEY.ppk
+      run: putty.exe -ssh test-staging.trp.ignishealth.com -i PRIVATE_KEY.ppk
