@@ -12,6 +12,9 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+      
+    - name: Update putty-tools package
+      run: sudo apt-get update && sudo apt-get upgrade putty-tools -y
 
     - name: Run PuTTY with private key
       run: |
