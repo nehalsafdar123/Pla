@@ -1,4 +1,4 @@
-name: PuTTY Example
+name: Run Vagrant
 
 on:
   push:
@@ -6,25 +6,26 @@ on:
       - main
 
 jobs:
-  build:
+  vagrant:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-      
-    - name: Set file permissions
-      run: chmod 400 PRIVATE_KEY.pem
 
-    - name: Write private key to file
-      run: echo "${{ secrets.PRIVATE_KEY }}" > PRIVATE_KEY.pem
-
-    - name: Convert private key to PuTTY format
+    - name: Set up Vagrant and VirtualBox
       run: |
-        openssl rsa -in PRIVATE_KEY.pem -outform DER -out PRIVATE_KEY.der
+        sudo apt-get update
+        sudo apt-get install vagrant virtualbox -y
+      if: runner.os == 'Linux' # Adjust for other OS runners
 
-    - name: Update putty-tools package
-      run: sudo apt-get update && sudo apt-get upgrade putty-tools -y
+    - name: Provision Vagrant VM
+      run: vagrant up
 
-    - name: Run PuTTY with private key
-      run: putty.exe -ssh username@hostname -i PRIVATE_KEY.ppk
+    - name: SSH into Vagrant VM and run commands
+      run: |
+        vagrant ssh -c "echo 'Running commands on Vagrant VM'"
+        vagrant ssh -c "your-command-here" # Replace with your actual commands
+
+    - name: Halt and destroy Vagrant VM
+      run: vagrant halt && vagrant destroy -f
