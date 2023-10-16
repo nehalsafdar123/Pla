@@ -15,14 +15,15 @@ jobs:
 
     - name: Set up Vagrant and VirtualBox
       run: |
-        vagrant init
         sudo apt-get update
         sudo apt-get install vagrant virtualbox -y
         
       if: runner.os == 'Linux' # Adjust for other OS runners
 
     - name: Provision Vagrant VM
-      run: vagrant up
+      run: |
+        vagrant init
+        vagrant up
 
     - name: SSH into Vagrant VM and run commands
       run: |
