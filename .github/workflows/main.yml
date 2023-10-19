@@ -1,34 +1,27 @@
-name: Run Vagrant
-
+name: Playwright Tests
 on:
   push:
-    branches:
-      - main
-
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 jobs:
-  vagrant:
+  test:
+    timeout-minutes: 60
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Set up Vagrant and VirtualBox
-      run: |
-        sudo apt-get update
-        sudo apt-get install vagrant virtualbox -y
-        
-      if: runner.os == 'Linux' # Adjust for other OS runners
-
-    - name: Provision Vagrant VM
-      run: |
-        vagrant init
-        vagrant up
-
-    - name: SSH into Vagrant VM and run commands
-      run: |
-        vagrant ssh -c "echo 'Running commands on Vagrant VM'"
-        vagrant ssh -c "your-command-here" # Replace with your actual commands
-
-    - name: Halt and destroy Vagrant VM
-      run: vagrant halt && vagrant destroy -f
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 18
+    - name: Install dependencies
+      run: npm ci
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+    - name: Run Playwright tests
+      run: npx playwright test
+    - uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30
