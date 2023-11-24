@@ -14,7 +14,7 @@ from playwright.sync_api import sync_playwright, Playwright, Page, expect
 
 
 def open_browser(p):
-    browser = p.chromium.launch(headless=False, channel="chrome")
+    browser = p.chromium.launch(headless=True, channel="chrome")
     context = browser.new_context()
     context.tracing.start(screenshots=True, snapshots=True, sources=True)
     page = context.new_page()
