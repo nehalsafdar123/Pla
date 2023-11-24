@@ -37,25 +37,23 @@ def test_make_default() -> None:
             "#username")
         username.fill("admin")
 
-        password = page.locator(
-            "#password")
-        password.click()
-
-        password = page.locator(
-            "#password")
-        password.fill("admin1PWD")
+        page.locator("input[type=\"password\"]").fill("admin1PWD")
 
         log_in = page.locator(
             "//button[. = 'Log in ']")
         log_in.click()
 
-        # entity_gallery = page.locator(
-        #     "//div/a[. = 'Entities Home']")
-        # entity_gallery.click()
+        time.sleep(4)
 
-        zipnosis = page.locator(
-            "//html/body/trp-root/trp-layout/trp-sidebar/nav/div[1]/div[4]/a/div/i")
-        zipnosis.click()
+        entity_gallery = page.locator(
+            "//div/a[. = 'Entities Home']")
+        entity_gallery.click()
+
+        time.sleep(2)
+
+        page.get_by_role("heading", name="Zipnosis").click()
+
+        time.sleep(3)
 
         page.get_by_role("heading", name="check for homepage and default").click()
 
@@ -75,13 +73,7 @@ def test_make_default() -> None:
             "//a[. = 'Encounter Home']")
         encounter_home3.click()
 
-        zipnosis = page.locator(
-            "//html/body/trp-root/trp-layout/trp-sidebar/nav/div[1]/div[4]/a/div/i")
-        zipnosis.click()
-
-        zipnosis = page.locator(
-            "//html/body/trp-root/trp-layout/trp-sidebar/nav/div[1]/div[4]/a/div/i")
-        zipnosis.click()
+        page.locator("//html/body/trp-root/trp-layout/trp-sidebar/nav/div[1]/div[3]/a/div/i").click()
 
         nehal_safdar_1 = page.locator(
             "//p-inplace/div")
@@ -99,13 +91,7 @@ def test_make_default() -> None:
 
         time.sleep(4)
 
-        zipnosis = page.locator(
-            "//html/body/trp-root/trp-layout/trp-sidebar/nav/div[1]/div[4]/a/div/i")
-        zipnosis.click()
-
-        zipnosis = page.locator(
-            "//html/body/trp-root/trp-layout/trp-sidebar/nav/div[1]/div[4]/a/div/i")
-        zipnosis.click()
+        page.locator("//html/body/trp-root/trp-layout/trp-sidebar/nav/div[1]/div[3]/a/div/i").click()
 
         nehal_safdar_2 = page.locator(
             "//p-inplace/div")
