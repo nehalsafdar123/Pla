@@ -1,12 +1,10 @@
 name: Playwright Tests
-on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+on: 
+  repository_dispatch:
+    types: [trp-test]
 jobs:
   test:
-    timeout-minutes: 60
+    timeout-minutes: 90
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
