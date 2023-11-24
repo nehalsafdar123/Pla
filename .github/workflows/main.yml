@@ -20,6 +20,7 @@ jobs:
     - name: Ensure browsers are installed
       run: |
         pip install playwright
+        pip install pytest
         python -m playwright install --with-deps
     - name: Run your tests
       run: pytest --tracing=retain-on-failure
