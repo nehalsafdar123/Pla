@@ -1,4 +1,4 @@
-name: Deploy Backend
+name: SSH into Ubuntu Server
 
 on:
   push:
@@ -6,15 +6,21 @@ on:
       - main
 
 jobs:
-  deploy:
+  ssh-into-server:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Deploy Backend
-      run: |
-        sudo su dokku
-        cd
-        .scripts/deploy_backend api.trp-full
+    - name: SSH into Ubuntu Server
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ settings.DEPLOYMENT_SERVER_HOSTNAME }}
+        username: ${{ settings.DEPLOYMENT_SERVER_USER }}
+        key: ${{ settings.DEPLOYMENT_SERVER_SSH_KEY }}
+        script: |
+          # Commands to run on the server after SSHing in
+          cd /path/to/your/project
+          git pull origin main
+          # Add more commands as needed
