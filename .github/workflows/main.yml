@@ -1,24 +1,39 @@
-name: Playwright Tests
-on: 
-  repository_dispatch:
-    types: [trp-test]
+name: Run UI Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test:
-    timeout-minutes: 90
+  Deployment:
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
-    - name: Install dependencies
+        python-version: '3.8'
+    - name: Install dependencies and browsers
       run: |
-        python -m pip install --upgrade pip
-    - name: Ensure browsers are installed
-      run: |
-        pip install playwright
-        pip install pytest
+        pip install pytest-playwright pytest-xdist
         python -m playwright install --with-deps
     - name: Run your tests
-      run: pytest .
+      # first we need to go to the playwright tests directory and run pytest there to avoid
+      # it auto-discovering the conftest.py for the unit tests.
+      # Next, we will run the admin login test and store login state in a file
+      # Then, in each test we will load the admin login state to avoid having to log in
+      # inside each test.
+      run: |
+        cd trp/core/playwright_tests
+        pytest --base-url https://test-staging.trp.ignishealth.com --numprocesses=auto login.py
+        pytest --base-url https://test-staging.trp.ignishealth.com --numprocesses=auto setup_imports_dashboard/dataset_creation/
+        pytest --base-url https://test-staging.trp.ignishealth.com --numprocesses=auto setup_imports_dashboard/dashboard_creation/
+        pytest --base-url https://test-staging.trp.ignishealth.com --numprocesses=auto functionality_test/
+        pytest --base-url https://test-staging.trp.ignishealth.com --numprocesses=auto functionality_test_second/
+        pytest --base-url https://trp-full.telehealthmgt.com --numprocesses=auto zoom_instance_test/
