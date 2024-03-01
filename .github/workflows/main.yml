@@ -30,9 +30,7 @@ jobs:
       # Then, in each test we will load the admin login state to avoid having to log in
       # inside each test.
       run: |
-        mkdir -p reports
-        pytest --base-url https://test-staging.trp.ignishealth.com --numprocesses=auto login.py
-        pytest --base-url https://test-staging.trp.ignishealth.com --numprocesses=auto functionality_test/ --html=report.html
+        pytest --base-url https://test-staging.trp.ignishealth.com --numprocesses=auto login.py --html=report.html
         
     - name: List files in the specified directory
       run: ls -R reports
