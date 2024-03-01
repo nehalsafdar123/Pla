@@ -30,7 +30,7 @@ jobs:
       # Then, in each test we will load the admin login state to avoid having to log in
       # inside each test.
       run: |
-        cd Playwright/functionality_test
+        cd functionality_test
         pytest --base-url https://test-staging.trp.ignishealth.com --headed -nauto --html=report.html .\functionality_test\test_applying_date_time_filter_days_of_week.py
         
     - name: List files in the specified directory
