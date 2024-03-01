@@ -21,7 +21,7 @@ jobs:
         python-version: '3.8'
     - name: Install dependencies and browsers
       run: |
-        pip install pytest-playwright pytest-xdist
+        pip install pytest-playwright pytest-xdist pytest-html
         python -m playwright install --with-deps
     - name: Run your tests
       # first we need to go to the playwright tests directory and run pytest there to avoid
@@ -31,4 +31,4 @@ jobs:
       # inside each test.
       run: |
         pytest --base-url https://test-staging.trp.ignishealth.com --numprocesses=auto login.py
-        pytest --base-url https://test-staging.trp.ignishealth.com --numprocesses=auto functionality_test/
+        pytest --base-url https://test-staging.trp.ignishealth.com --numprocesses=auto functionality_test/ --html=report.html
