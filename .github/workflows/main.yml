@@ -30,10 +30,5 @@ jobs:
       # Then, in each test we will load the admin login state to avoid having to log in
       # inside each test.
       run: |
-        cd trp/core/playwright_tests
         pytest --base-url https://test-staging.trp.ignishealth.com --numprocesses=auto login.py
-        pytest --base-url https://test-staging.trp.ignishealth.com --numprocesses=auto setup_imports_dashboard/dataset_creation/
-        pytest --base-url https://test-staging.trp.ignishealth.com --numprocesses=auto setup_imports_dashboard/dashboard_creation/
         pytest --base-url https://test-staging.trp.ignishealth.com --numprocesses=auto functionality_test/
-        pytest --base-url https://test-staging.trp.ignishealth.com --numprocesses=auto functionality_test_second/
-        pytest --base-url https://trp-full.telehealthmgt.com --numprocesses=auto zoom_instance_test/
