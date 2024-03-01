@@ -32,3 +32,9 @@ jobs:
       run: |
         pytest --base-url https://test-staging.trp.ignishealth.com --numprocesses=auto login.py
         pytest --base-url https://test-staging.trp.ignishealth.com --numprocesses=auto functionality_test/ --html=report.html
+
+    - name: Upload HTML report
+      uses: actions/upload-artifact@v2
+      with:
+        name: test-reports
+        path: report.html
