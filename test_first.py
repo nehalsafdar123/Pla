@@ -15,16 +15,6 @@ def test_drill_down_level_1_CH(page: Page, settings) -> None:
     page.goto("/")
     expect(page.get_by_role("link", name="Support Account")).to_be_visible()
 
-    # storage_state = page.context.storage_state()
-    # page.set_viewport_size({"width": 1900, "height": 1000})
-
-    # Save the storage state to a file
-    # storage_path = os.path.join(settings.ui_tests_root, "login_save.json")
-    # with open(storage_path, 'w') as file:
-    #     json.dump(storage_state, file, indent=2)
-    #
-
-
     with open('superuser_login_state.json', 'r') as file:
         auth_data = json.load(file)
 
@@ -88,15 +78,10 @@ def test_drill_down_level_1_CH(page: Page, settings) -> None:
 
     page.get_by_role("textbox").fill("Encounter Type")
 
-    # encounter_type1 = page.locator(
-    #     "//li[. = 'Encounter Type']")
-    # encounter_type1.click()
-
     page.get_by_text("Encounter Type").click()
 
     page.wait_for_timeout(4000)
 
-    # pres_directory = os.getcwd()
     screenshot_path = os.path.join(settings.ui_tests_root, "live_level1_SS.jpg")
 
     location = page.locator(
@@ -104,8 +89,6 @@ def test_drill_down_level_1_CH(page: Page, settings) -> None:
 
     location.screenshot(path=screenshot_path)
     screenshot_image = Image.open(screenshot_path).convert('RGB')
-
-    # current_working_directory = os.getcwd()
     file_path = os.path.join(settings.ui_tests_root, "level1.jpg")
     original_image = Image.open(file_path).convert('RGB')
 
@@ -139,17 +122,17 @@ def test_drill_down_level_1_CH(page: Page, settings) -> None:
     location.screenshot(path=screenshot_path)
     screenshot_image = Image.open(screenshot_path).convert('RGB')
 
-    file_path = os.path.join(settings.ui_tests_root, "level-1-PointChange.jpg")
+    file_path = os.path.join(settings.ui_tests_root, "level1_PointChange.jpg")
     original_image = Image.open(file_path).convert('RGB')
 
     diff = ImageChops.difference(original_image, screenshot_image)
 
     if diff.getbbox() is not None:
         percentage_diff = (diff.getbbox()[2] * diff.getbbox()[3]) / (
-            screenshot_image.size[0] * screenshAot_image.size[1]) * 100
+            screenshot_image.size[0] * screenshot_image.size[1]) * 100
     else:
         percentage_diff = 0.0
 
-    tolerance = 93  # Adjust this value as per your requirements
+    tolerance = 5  # Adjust this value as per your requirements
     # diff.show()   #To Show the difference of an image
     percentage_diff <= tolerance
