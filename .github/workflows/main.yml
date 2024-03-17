@@ -31,3 +31,4 @@ jobs:
       # inside each test.
       run: |
         pytest --base-url https://test-staging.trp.ignishealth.com --numprocesses=auto login.py
+        pytest --base-url https://test-staging.trp.ignishealth.com --numprocesses=auto test_first.py
