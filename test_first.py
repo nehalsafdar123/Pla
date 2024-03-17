@@ -1,109 +1,155 @@
-import re
-import time
-
-from playwright.sync_api import sync_playwright, Playwright, Page, expect
-
-
-# ''
-# click on entity gallery and then go to zipnosis and then to homepage and default over there select the nehal safdar 1
-# dashboard as default and then click vidyo section and then again click zipnosis home button nehal safdar dashboard will be open
-# so checking its label overthere .
-# Now make the nehal safdar 2 as default dashboard and again click on vidyo and
-# come back to zipnosis home nehal safdar 2 dashboard will be open
-# '''
+import pytest
+import os
+import requests
+import json
+from PIL import Image, ImageChops
+from playwright.sync_api import Page, expect
 
 
-def open_browser(p):
-    browser = p.chromium.launch(headless=True, channel="chrome")
-    context = browser.new_context()
-    context.tracing.start(screenshots=True, snapshots=True, sources=True)
-    page = context.new_page()
-    page.goto("https://test-staging.trp.ignishealth.com/accounts/login")
-    return {'page': page, 'context': context}
+@pytest.mark.browser_context_args(storage_state="superuser_login_state.json")
+def test_drill_down_level_1_CH(page: Page, settings) -> None:
+    '''
+    using test project recording feature screenshots are taken of correct drill down images and the script is written to create the same result again and comparing
+    that result with the screenshots already stored. Threshold is 5%
+    '''
+    page.goto("/")
+    expect(page.get_by_role("link", name="Support Account")).to_be_visible()
+
+    # storage_state = page.context.storage_state()
+    # page.set_viewport_size({"width": 1900, "height": 1000})
+
+    # Save the storage state to a file
+    # storage_path = os.path.join(settings.ui_tests_root, "login_save.json")
+    # with open(storage_path, 'w') as file:
+    #     json.dump(storage_state, file, indent=2)
+    #
 
 
-def test_make_default() -> None:
-    with sync_playwright() as p:
-        Content = open_browser(p)
+    with open('superuser_login_state.json', 'r') as file:
+        auth_data = json.load(file)
 
-        page = Content['page']
-        context = Content['context']
+    access_token = None
+    for origin in auth_data.get("origins", []):
+        for item in origin.get("localStorage", []):
+            if item.get("name") == "TRP-Token":
+                access_token = item.get("value")
+                break
 
-        username = page.locator(
-            "#username")
-        username.click()
+    # Use the access token from the loaded data
+    headers = {'Authorization': f'TRP {access_token}'}
 
-        username = page.locator(
-            "#username")
-        username.fill("admin")
+    endpointurl = "analytics/charts/?chart_type=line&series_names=Created%20At&x_field=cl_encountert_ountertype_db407875c277e3efb193&x_period=month_year&xaxis_type=category&source_id=42&sub_dataset_id=42&filters=cl_createdat_04abce75ed454a005177__range%3D%5B2020-01-01T00%3A00%3A00%2C2020-01-31T23%3A59%3A59%5D&metric=10"
 
-        page.locator("input[type=\"password\"]").fill("admin1PWD")
+    BASE_URL='https://api.test-staging.trp.ignishealth.com/'
+    url = f"{BASE_URL}{endpointurl}"
 
-        log_in = page.locator(
-            "//button[. = 'Log in ']")
-        log_in.click()
+    # Make a GET request to the API
+    response = requests.get(url, headers=headers)
+    target_values = [
+        {"cl_encountert_ountertype_db407875c277e3efb193": "In Patient", "counter": 2},
+        {"cl_encountert_ountertype_db407875c277e3efb193": "TeleHealth", "counter": 6},
+        {"cl_encountert_ountertype_db407875c277e3efb193": "Out Patient", "counter": 5}
+    ]
 
-        time.sleep(4)
+    assert response.status_code == 200
+    data = response.json()
+    for target_value in target_values:
+        assert target_value in data['values'][0]
 
-        entity_gallery = page.locator(
-            "//div/a[. = 'Entities Home']")
-        entity_gallery.click()
+    endpointurl = "analytics/charts/?chart_type=line&series_names=Created%20At&x_field=cl_encountert_ountertype_db407875c277e3efb193&x_period=month_year&xaxis_type=category&source_id=42&sub_dataset_id=42&filters=cl_createdat_04abce75ed454a005177__range%3D%5B2019-04-01T00%3A00%3A00%2C2019-04-30T23%3A59%3A59%5D&metric=10"
 
-        time.sleep(2)
+    url = f"{BASE_URL}{endpointurl}"
 
-        page.get_by_role("heading", name="Zipnosis").click()
+    # Make a GET request to the API
+    response = requests.get(url, headers=headers)
+    target_values = [
+        {"cl_encountert_ountertype_db407875c277e3efb193": "In Patient", "counter": 3},
+        {"cl_encountert_ountertype_db407875c277e3efb193": "TeleHealth", "counter": 2},
+        {"cl_encountert_ountertype_db407875c277e3efb193": "Out Patient", "counter": 5}
+    ]
 
-        time.sleep(3)
+    assert response.status_code == 200
+    data = response.json()
+    for target_value in target_values:
+        assert target_value in data['values'][0]
 
-        page.get_by_role("heading", name="check for homepage and default").click()
+    sidebar_element = page.locator('.sidebar.collapsed')
+    entity_gallery = sidebar_element.locator('a[href="/manage-database"]')
+    entity_gallery.click()
 
-        dashboards = page.locator(
-            "//a[. = 'Dashboards']")
-        dashboards.click()
+    page.get_by_role("heading", name="Encounter").click()
+    page.get_by_role("heading", name="CH Drilldown2").click()
+    page.get_by_role("button", name="drill down dashboard").click()
+    expect(page.get_by_role("button", name="Drill Down")).to_be_visible()
+    page.get_by_role("button", name="Drill Down").click()
 
-        page.get_by_placeholder("Search Dashboard").fill("nehal 1")
+    page.locator(
+        "ngb-modal-window trp-drilled-chart g.highcharts-markers.highcharts-series-0.highcharts-line-series.highcharts-color-0.highcharts-tracker > path:nth-child(11)").click()
 
-        time.sleep(4)
+    page.get_by_role("textbox").fill("Encounter Type")
 
-        page.locator("//html/body/trp-root/trp-layout/section/trp-dataset-details/div/div/div[2]/p-tabview/div/div[2]/p-tabpanel[1]/div/p-table/div/div[2]/table/tbody/tr/td[7]/button[1]").first.click()
+    # encounter_type1 = page.locator(
+    #     "//li[. = 'Encounter Type']")
+    # encounter_type1.click()
 
-        time.sleep(4)
+    page.get_by_text("Encounter Type").click()
 
-        encounter_home3 = page.locator(
-            "//a[. = 'Encounter Home']")
-        encounter_home3.click()
+    page.wait_for_timeout(4000)
 
-        page.locator("//html/body/trp-root/trp-layout/trp-sidebar/nav/div[1]/div[3]/a/div/i").click()
+    # pres_directory = os.getcwd()
+    screenshot_path = os.path.join(settings.ui_tests_root, "live_level1_SS.jpg")
 
-        nehal_safdar_1 = page.locator(
-            "//p-inplace/div")
+    location = page.locator(
+        "ngb-modal-window .modal-body > div > :nth-child(2) .highcharts-container > .highcharts-root > .highcharts-background")
 
-        expect(nehal_safdar_1).to_have_text(re.compile("nehal 1"))
+    location.screenshot(path=screenshot_path)
+    screenshot_image = Image.open(screenshot_path).convert('RGB')
 
-        page.get_by_role("button", name="Manage Dashboards").click()
+    # current_working_directory = os.getcwd()
+    file_path = os.path.join(settings.ui_tests_root, "level1.jpg")
+    original_image = Image.open(file_path).convert('RGB')
 
-        page.get_by_placeholder("Search Dashboard").fill("nehal 2")
+    diff = ImageChops.difference(original_image, screenshot_image)
 
-        time.sleep(4)
+    if diff.getbbox() is not None:
+        percentage_diff = (diff.getbbox()[2] * diff.getbbox()[3]) / (
+            screenshot_image.size[0] * screenshot_image.size[1]) * 100
+    else:
+        percentage_diff = 0.0
 
-        page.locator(
-            "//html/body/trp-root/trp-layout/section/trp-dataset-details/div/div/div[2]/p-tabview/div/div[2]/p-tabpanel[1]/div/p-table/div/div[2]/table/tbody/tr/td[7]/button[1]").first.click()
+    tolerance = 5  # Adjust this value as per your requirements
+    # diff.show()  # To Show the difference of an image
+    percentage_diff <= tolerance
 
-        time.sleep(4)
+    page.wait_for_timeout(3000)
 
-        page.locator("//html/body/trp-root/trp-layout/trp-sidebar/nav/div[1]/div[3]/a/div/i").click()
+    page.locator(
+        "ngb-modal-window .modal-body > div > :nth-child(1) .highcharts-container > .highcharts-root > .highcharts-series-group > .highcharts-markers > path:nth-child(5)").click()
 
-        nehal_safdar_2 = page.locator(
-            "//p-inplace/div")
-        expect(nehal_safdar_2).to_have_text(re.compile("nehal 2"))
+    page.locator(
+        "ngb-modal-window .modal-body > div > :nth-child(1) .highcharts-container > .highcharts-root > .highcharts-series-group > .highcharts-markers > path:nth-child(5)").click()
 
-        page.get_by_role("button", name="Manage Dashboards").click()
+    page.wait_for_timeout(3000)
 
-        page.get_by_placeholder("Search Dashboard").fill("nehal 2")
+    screenshot_path = os.path.join(settings.ui_tests_root, "live_level1_PointChange_SS.jpg")
 
-        time.sleep(4)
+    location = page.locator(
+        "ngb-modal-window .modal-body > div > :nth-child(2) .highcharts-container > .highcharts-root > .highcharts-background")
 
-        page.locator(
-            "//html/body/trp-root/trp-layout/section/trp-dataset-details/div/div/div[2]/p-tabview/div/div[2]/p-tabpanel[1]/div/p-table/div/div[2]/table/tbody/tr/td[7]/button[1]").first.click()
+    location.screenshot(path=screenshot_path)
+    screenshot_image = Image.open(screenshot_path).convert('RGB')
 
+    file_path = os.path.join(settings.ui_tests_root, "level-1-PointChange.jpg")
+    original_image = Image.open(file_path).convert('RGB')
 
+    diff = ImageChops.difference(original_image, screenshot_image)
+
+    if diff.getbbox() is not None:
+        percentage_diff = (diff.getbbox()[2] * diff.getbbox()[3]) / (
+            screenshot_image.size[0] * screenshAot_image.size[1]) * 100
+    else:
+        percentage_diff = 0.0
+
+    tolerance = 93  # Adjust this value as per your requirements
+    # diff.show()   #To Show the difference of an image
+    percentage_diff <= tolerance
