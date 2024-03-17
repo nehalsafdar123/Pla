@@ -23,6 +23,7 @@ jobs:
       run: |
         pip install pytest-playwright pytest-xdist pytest-html
         python -m playwright install --with-deps
+        pip install Pillow
     - name: Run your tests
       # first we need to go to the playwright tests directory and run pytest there to avoid
       # it auto-discovering the conftest.py for the unit tests.
